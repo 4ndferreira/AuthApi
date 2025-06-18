@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using AuthApi.Contracts.Token;
 using AuthApi.Models;
 using AuthApi.Settings;
 using Microsoft.Extensions.Options;
@@ -8,7 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace AuthApi.Service;
 
-public class TokenService
+public class TokenService : ITokenService
 {
   private readonly JwtSettings _jwt;
 
