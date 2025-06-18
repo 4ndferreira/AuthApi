@@ -5,5 +5,6 @@ namespace AuthApi.Contracts.Auth;
 
 public interface IAuthService
 {
-  Task<RegisterResult> RegisterAsync(RegisterRequest request);
+  Task<Result<Guid>> RegisterAsync(RegisterRequest request);
+  Task<Result<TokenResult>> LoginAsync(LoginRequest request);
 }
