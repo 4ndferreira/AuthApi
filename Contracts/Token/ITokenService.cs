@@ -1,8 +1,9 @@
 using AuthApi.Models;
+using AuthApi.Dtos;
 
 namespace AuthApi.Contracts.Token;
 
 public interface ITokenService
 {
-  string GenerateToken(User user);
+  TokenResult GenerateToken(User user);
 }

@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using AuthApi.Contracts.Token;
+using AuthApi.Dtos;
 using AuthApi.Models;
 using AuthApi.Settings;
 using Microsoft.Extensions.Options;
@@ -15,29 +16,49 @@ public class TokenService : ITokenService
 
   public TokenService(IOptions<JwtSettings> jwtOptions)
   {
-    _jwt = jwtOptions.Value ?? throw new ArgumentNullException(nameof(jwtOptions), "JWT Key ausente");
+    _jwt = jwtOptions.Value ?? throw new ArgumentNullException(nameof(jwtOptions), "JWT config ausente");
+
+    if (string.IsNullOrWhiteSpace(_jwt.Key))
+      throw new ArgumentException("A chave JWT está vazia ou é inválida.", nameof(jwtOptions));
   }
 
-  public string GenerateToken(User user)
+  public TokenResult GenerateToken(User user)
   {
-    var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key));
-    var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+    var claims = GetClaims(user);
+    var credentials = GetSigningCredentials();
+    var token = CreateJwtToken(claims, credentials);
 
-    var claims = new[]
+    return new TokenResult
     {
+      AccessToken = new JwtSecurityTokenHandler().WriteToken(token),
+      Expiration = token.ValidTo
+    };
+  }
+
+  private static Claim[] GetClaims(User user)
+  {
+    return
+    [
       new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
       new Claim(JwtRegisteredClaimNames.Email, user.Email!),
       new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-    };
+    ];
+  }
 
-    var token = new JwtSecurityToken(
+  private SigningCredentials GetSigningCredentials()
+  {
+    var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key));
+    return new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+  }
+
+  private JwtSecurityToken CreateJwtToken(IEnumerable<Claim> claims, SigningCredentials credentials)
+  {
+    return new JwtSecurityToken(
       issuer: _jwt.Issuer,
       audience: _jwt.Audience,
       claims: claims,
       expires: DateTime.UtcNow.AddMinutes(_jwt.ExpireMinutes),
-      signingCredentials: creds
+      signingCredentials: credentials
     );
-
-    return new JwtSecurityTokenHandler().WriteToken(token);
   }
 }
