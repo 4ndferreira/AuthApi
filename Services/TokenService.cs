@@ -14,7 +14,7 @@ public class TokenService : ITokenService
 {
   private readonly JwtSettings _jwt;
 
-  public TokenService(IOptions<JwtSettings> jwtOptions, IRefreshTokenService refreshTokenService)
+  public TokenService(IOptions<JwtSettings> jwtOptions)
   {
     _jwt = jwtOptions.Value ?? throw new ArgumentNullException(nameof(jwtOptions), "JWT config ausente");
 
@@ -43,6 +43,9 @@ public class TokenService : ITokenService
       new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
       new Claim(JwtRegisteredClaimNames.Email, user.Email!),
       new Claim(ClaimTypes.Email, user.Email!),
+      new Claim(ClaimTypes.Name, user.Name!),
+      new Claim("username", user.Username!),
+      new Claim(ClaimTypes.Role, user.Role!),
       new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
     ];
   }
