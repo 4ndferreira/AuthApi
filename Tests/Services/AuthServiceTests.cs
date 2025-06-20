@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Identity.Data;
 using Moq;
 using Xunit;
 
+namespace AuthApi.Tests.Services;
+
 public class AuthServiceTests
 {
   private readonly Mock<IAuthRepository> _authRepositoryMock;
