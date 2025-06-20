@@ -1,4 +1,4 @@
-using AuthApi.Contracts.Auth;
+using AuthApi.Contracts;
 using AuthApi.Data;
 using AuthApi.Models;
 using Microsoft.EntityFrameworkCore;

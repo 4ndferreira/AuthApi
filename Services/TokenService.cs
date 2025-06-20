@@ -1,20 +1,20 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using AuthApi.Contracts.Token;
+using AuthApi.Contracts;
 using AuthApi.Dtos;
 using AuthApi.Models;
 using AuthApi.Settings;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
-namespace AuthApi.Service;
+namespace AuthApi.Services;
 
 public class TokenService : ITokenService
 {
   private readonly JwtSettings _jwt;
 
-  public TokenService(IOptions<JwtSettings> jwtOptions)
+  public TokenService(IOptions<JwtSettings> jwtOptions, IRefreshTokenService refreshTokenService)
   {
     _jwt = jwtOptions.Value ?? throw new ArgumentNullException(nameof(jwtOptions), "JWT config ausente");
 

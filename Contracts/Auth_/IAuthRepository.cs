@@ -1,6 +1,6 @@
 using AuthApi.Models;
 
-namespace AuthApi.Contracts.Auth;
+namespace AuthApi.Contracts;
 
 public interface IAuthRepository
 {

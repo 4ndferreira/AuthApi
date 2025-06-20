@@ -1,20 +1,19 @@
-using AuthApi.Contracts.Auth;
-using AuthApi.Contracts.Token;
+using AuthApi.Contracts;
 using AuthApi.Dtos;
 using AuthApi.Models;
 using Microsoft.AspNetCore.Identity.Data;
 
-namespace AuthApi.Service;
+namespace AuthApi.Services;
 
 public class AuthService : IAuthService
 {
   private readonly IAuthRepository _authRepository;
-  private readonly ITokenService _tokenService;
+  private readonly IRefreshTokenService _refreshTokenService;
 
-  public AuthService(IAuthRepository authRepository, ITokenService tokenService)
+  public AuthService(IAuthRepository authRepository, IRefreshTokenService refreshTokenService)
   {
     _authRepository = authRepository ?? throw new ArgumentNullException(nameof(authRepository));
-    _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
+    _refreshTokenService = refreshTokenService ?? throw new ArgumentNullException(nameof(refreshTokenService));
   }
 
   public async Task<Result<TokenResult>> LoginAsync(LoginRequest request)
@@ -24,9 +23,9 @@ public class AuthService : IAuthService
     if (user is null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
       return Result<TokenResult>.Failure("Email ou senha inválidos.");
 
-    var token = _tokenService.GenerateToken(user);
+    var tokens = await _refreshTokenService.GenerateTokensAsync(user);
     
-    return Result<TokenResult>.SuccessResult(token);
+    return Result<TokenResult>.SuccessResult(tokens.Value!);
   }
 
   public async Task<Result<Guid>> RegisterAsync(RegisterRequest request)

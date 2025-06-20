@@ -1,7 +1,7 @@
 using AuthApi.Dtos;
 using Microsoft.AspNetCore.Identity.Data;
 
-namespace AuthApi.Contracts.Auth;
+namespace AuthApi.Contracts;
 
 public interface IAuthService
 {

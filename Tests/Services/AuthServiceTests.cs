@@ -1,7 +1,6 @@
-using AuthApi.Contracts.Auth;
-using AuthApi.Contracts.Token;
+using AuthApi.Contracts;
 using AuthApi.Models;
-using AuthApi.Service;
+using AuthApi.Services;
 using Microsoft.AspNetCore.Identity.Data;
 using Moq;
 using Xunit;
@@ -11,14 +10,14 @@ namespace AuthApi.Tests.Services;
 public class AuthServiceTests
 {
   private readonly Mock<IAuthRepository> _authRepositoryMock;
-  private readonly Mock<ITokenService> _tokenServiceMock;
+  private readonly Mock<IRefreshTokenService> _refreshTokenServiceMock;
   private readonly AuthService _authService;
 
   public AuthServiceTests()
   {
     _authRepositoryMock = new Mock<IAuthRepository>();
-    _tokenServiceMock = new Mock<ITokenService>();
-    _authService = new AuthService(_authRepositoryMock.Object, _tokenServiceMock.Object);
+    _refreshTokenServiceMock = new Mock<IRefreshTokenService>();
+    _authService = new AuthService(_authRepositoryMock.Object, _refreshTokenServiceMock.Object);
   }
 
   [Fact]

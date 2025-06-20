@@ -1,7 +1,7 @@
 using AuthApi.Models;
 using AuthApi.Dtos;
 
-namespace AuthApi.Contracts.Token;
+namespace AuthApi.Contracts;
 
 public interface ITokenService
 {

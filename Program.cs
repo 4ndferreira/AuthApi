@@ -4,9 +4,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using AuthApi.Settings;
-using AuthApi.Service;
-using AuthApi.Contracts.Token;
-using AuthApi.Contracts.Auth;
+using AuthApi.Services;
+using AuthApi.Contracts;
 using AuthApi.Repository;
 using Microsoft.OpenApi.Models;
 
@@ -74,6 +73,8 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite("Data S
 
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 
 builder.Services.AddAuthorization();

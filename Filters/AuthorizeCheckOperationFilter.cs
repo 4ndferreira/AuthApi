@@ -13,10 +13,9 @@ public class AuthorizeCheckOperationFilter : IOperationFilter
 
     if (hasAuthorize)
     {
-      operation.Security = new List<OpenApiSecurityRequirement>
-            {
-                new OpenApiSecurityRequirement
-                {
+      operation.Security =
+            [
+                new() {
                     [ new OpenApiSecurityScheme
                         {
                             Reference = new OpenApiReference
@@ -25,9 +24,9 @@ public class AuthorizeCheckOperationFilter : IOperationFilter
                                 Id = "Bearer"
                             }
                         }
-                    ] = new string[] {}
+                    ] = []
                 }
-            };
+            ];
     }
   }
 }

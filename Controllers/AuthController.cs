@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
-using AuthApi.Contracts.Auth;
+using AuthApi.Contracts;
 
 namespace AuthApi.Controllers;
 
@@ -9,10 +9,12 @@ namespace AuthApi.Controllers;
 public class AuthController : ControllerBase
 {
   private readonly IAuthService _authService;
+  private readonly IRefreshTokenService _refreshTokenService;
 
-  public AuthController(IAuthService authService)
+  public AuthController(IAuthService authService, IRefreshTokenService refreshTokenService)
   {
     _authService = authService ?? throw new ArgumentNullException(nameof(authService));
+    _refreshTokenService = refreshTokenService ?? throw new ArgumentNullException(nameof(refreshTokenService));
   }
 
   [HttpPost("register")]
@@ -28,8 +30,17 @@ public class AuthController : ControllerBase
   public async Task<IActionResult> Login([FromBody] LoginRequest request)
   {
     var result = await _authService.LoginAsync(request);
+
     return result.Success
-    ? Ok(result.Value) 
+    ? Ok(result.Value)
+    : Unauthorized(new { message = result.Message });
+  }
+  [HttpPost("refresh")]
+  public async Task<IActionResult> RefreshToken([FromBody] RefreshRequest request)
+  {
+    var result = await _refreshTokenService.RefreshTokenAsync(request.RefreshToken);
+    return result.Success
+    ? Ok(new { result.Value!.AccessToken, result.Value.RefreshToken}) 
     : Unauthorized(new { message = result.Message });
   }
 }
