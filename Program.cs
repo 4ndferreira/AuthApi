@@ -1,4 +1,4 @@
-using AuthApi.Data;
+﻿using AuthApi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -6,48 +6,77 @@ using System.Text;
 using AuthApi.Settings;
 using AuthApi.Service;
 using AuthApi.Contracts.Token;
+using AuthApi.Contracts.Auth;
+using AuthApi.Repository;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddControllers();
-
-builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-// Database
-builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite("Data Source=auth.db"));
-
-builder.Services.AddScoped<ITokenService, TokenService>();
-
 var jwtSection = builder.Configuration.GetSection("Jwt");
 var jwt = jwtSection.Get<JwtSettings>();
 
 builder.Services
     .AddAuthentication(options =>
     {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+      options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+      options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
     })
     .AddJwtBearer(options =>
     {
-        var key = Encoding.UTF8.GetBytes(jwt!.Key);
-
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = jwt.Issuer,
-            ValidAudience = jwt.Audience,
-            IssuerSigningKey = new SymmetricSecurityKey(key),
-        };
+      options.TokenValidationParameters = new TokenValidationParameters
+      {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwt!.Issuer,
+        ValidAudience = jwt.Audience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Key))
+      };
     }
 );
+
+builder.Services.AddControllers();
+
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+  c.SwaggerDoc("v1", new OpenApiInfo { Title = "AuthApi", Version = "v1" });
+  c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+  {
+    Description = "Insira o token JWT no formato: Bearer {seu token}",
+    Name = "Authorization",
+    In = ParameterLocation.Header,
+    Type = SecuritySchemeType.ApiKey,
+    Scheme = "Bearer"
+  });
+  c.AddSecurityRequirement(new OpenApiSecurityRequirement
+  {
+    {
+      new OpenApiSecurityScheme
+      {
+        Reference = new OpenApiReference
+        {
+          Type = ReferenceType.SecurityScheme,
+          Id = "Bearer"
+        }
+      },
+      Array.Empty<string>()
+    }
+  });
+});
+
+// Database
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite("Data Source=auth.db"));
+
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -59,33 +88,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-/* var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi(); */
-
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+app.Run();
