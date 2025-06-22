@@ -50,8 +50,16 @@ public class RefreshTokenService : IRefreshTokenService
     return Result<TokenResult>.SuccessResult(newTokens.Value!);
   }
 
-  public async Task RevokeRefreshTokenAsync(string refreshToken)
+  public async Task<Result<string>> RevokeRefreshTokenAsync(string refreshToken)
   {
+    var tokenFromDb = await _refreshTokenRepository.GetRefreshTokenAsync(refreshToken);
+    if (tokenFromDb == null || tokenFromDb.IsRevoked)
+      return Result<string>.Failure("Refresh Token inválido ou já revogado.");
+
+    tokenFromDb.RevokedAt = DateTime.UtcNow;
+
     await _refreshTokenRepository.RevokeRefreshTokenAsync(refreshToken);
+
+    return Result<string>.SuccessResult("Logout realizado com sucesso.");
   }
 }

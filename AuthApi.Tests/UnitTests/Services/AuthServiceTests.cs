@@ -14,7 +14,7 @@ public class AuthServiceTests
   private readonly AuthService _authService;
 
   public AuthServiceTests()
-  {
+  { 
     _authRepositoryMock = new Mock<IAuthRepository>();
     _refreshTokenServiceMock = new Mock<IRefreshTokenService>();
     _authService = new AuthService(_authRepositoryMock.Object, _refreshTokenServiceMock.Object);

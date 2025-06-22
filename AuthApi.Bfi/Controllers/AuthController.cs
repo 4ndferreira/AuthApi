@@ -1,6 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
 using AuthApi.Application.Abstractions;
 using AuthApi.Application.Dtos;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace AuthApi.Bfi.Controllers;
 
@@ -43,5 +44,15 @@ public class AuthController : ControllerBase
     return result.Success
     ? Ok(new { result.Value!.AccessToken, result.Value.RefreshToken}) 
     : Unauthorized(new { message = result.Message });
+  }
+  [HttpPost("logout")]
+  [Authorize]
+  public async Task<IActionResult> Logout([FromBody] LogoutRequest request)
+  {
+    var result = await _refreshTokenService.RevokeRefreshTokenAsync(request.RefreshToken);
+
+    return result.Success
+    ? Ok(new { message = result.Value })
+    : BadRequest(new { message = result.Message });
   }
 }

@@ -7,5 +7,5 @@ public interface IRefreshTokenService
 {
   Task<Result<TokenResult>> GenerateTokensAsync(User user);
   Task<Result<TokenResult>> RefreshTokenAsync(string refreshToken);
-  Task RevokeRefreshTokenAsync(string refreshToken);
+  Task<Result<string>> RevokeRefreshTokenAsync(string refreshToken);
 }

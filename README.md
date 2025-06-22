@@ -60,7 +60,7 @@ Este projeto foi desenvolvido como um modelo de referência para aplicações we
      dotnet user-secrets set "Jwt:Key" "sua-chave-secreta" --project AuthApi.Bfi
      dotnet user-secrets set "Jwt:Issuer" "AuthApi" --project AuthApi.Bfi
      dotnet user-secrets set "Jwt:Audience" "AuthApiUser" --project AuthApi.Bfi
-     dotnet user-secrets set "Jwt:ExpireMinutes" "60" --project AuthApi.Bfi
+     dotnet user-secrets set "Jwt:ExpireMinutes" "15" --project AuthApi.Bfi
      ```
 
    - **Ou `appsettings.json`**:
@@ -69,7 +69,7 @@ Este projeto foi desenvolvido como um modelo de referência para aplicações we
        "Key": "sua-chave-secreta",
        "Issuer": "AuthApi",
        "Audience": "AuthApiUser",
-       "ExpireMinutes": 60
+       "ExpireMinutes": 15
      }
      ```
 
@@ -78,7 +78,7 @@ Este projeto foi desenvolvido como um modelo de referência para aplicações we
      export Jwt__Key=sua-chave-secreta
      export Jwt__Issuer=AuthApi
      export Jwt__Audience=AuthApiUser
-     export Jwt__ExpireMinutes=60
+     export Jwt__ExpireMinutes=15
      ```
 
 ## Como gerar uma chave secreta forte para o JWT
