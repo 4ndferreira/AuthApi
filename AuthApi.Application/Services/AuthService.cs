@@ -9,11 +9,31 @@ public class AuthService : IAuthService
 {
   private readonly IAuthRepository _authRepository;
   private readonly IRefreshTokenService _refreshTokenService;
+  private readonly IPasswordHasher _passwordHasher;
 
-  public AuthService(IAuthRepository authRepository, IRefreshTokenService refreshTokenService)
+  public AuthService(IAuthRepository authRepository, IRefreshTokenService refreshTokenService, IPasswordHasher passwordHasher)
   {
     _authRepository = authRepository ?? throw new ArgumentNullException(nameof(authRepository));
     _refreshTokenService = refreshTokenService ?? throw new ArgumentNullException(nameof(refreshTokenService));
+    _passwordHasher = passwordHasher ?? throw new ArgumentNullException(nameof(passwordHasher));
+  }
+
+  public async Task<Result<string>> ChangePasswordAsync(Guid userId, ChangePasswordRequest request)
+  {
+    var user = await _authRepository.GetUserByIdAsync(userId);
+    if (user == null) 
+      return Result<string>.Failure("Usuário não encontrado.");
+
+    if (!BCrypt.Net.BCrypt.Verify(request.CurrentPassword, user.PasswordHash))
+      return Result<string>.Failure("Senha atual incorreta.");
+
+    if (request.CurrentPassword == request.NewPassword)
+      return Result<string>.Failure("A nova senha não pode ser igual à atual.");
+
+    user.PasswordHash = _passwordHasher.Hash(request.NewPassword);
+    await _authRepository.SaveChangesAsync(user);
+
+    return Result<string>.SuccessResult("Senha alterada com sucesso.");
   }
 
   public async Task<Result<TokenResult>> LoginAsync(LoginRequest request)

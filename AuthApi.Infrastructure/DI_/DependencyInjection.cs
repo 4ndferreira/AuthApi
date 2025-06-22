@@ -4,6 +4,7 @@ using AuthApi.Domain.Abstractions;
 using AuthApi.Infrastructure.Data;
 using AuthApi.Infrastructure.Jwt;
 using AuthApi.Infrastructure.Repositories;
+using AuthApi.Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,6 +22,7 @@ public static class DependencyInjection
     services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
     services.AddScoped<IRefreshTokenService, RefreshTokenService>();
     services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+    services.AddScoped<IPasswordHasher, BcryptPasswordHasher>();
 
     return services;
   }

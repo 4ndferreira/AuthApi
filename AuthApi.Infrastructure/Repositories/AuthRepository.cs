@@ -19,6 +19,11 @@ public class AuthRepository : IAuthRepository
     await _context.SaveChangesAsync();
   }
 
+  public async Task<User?> GetUserByIdAsync(Guid id)
+  {
+    return await _context.Users.SingleOrDefaultAsync(u => u.Id == id);
+  }
+
   public async Task<User?> GetUserByEmailAsync(string email)
   {
     return await _context.Users.SingleOrDefaultAsync(u => u.Email == email);
@@ -27,5 +32,10 @@ public class AuthRepository : IAuthRepository
   public async Task<bool> UserExistsByEmailAsync(string email)
   {
     return await _context.Users.AnyAsync(u => u.Email == email);
+  }
+
+  public async Task SaveChangesAsync(User user)
+  {
+    await _context.SaveChangesAsync();
   }
 }

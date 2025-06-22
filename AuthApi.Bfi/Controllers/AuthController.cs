@@ -2,6 +2,7 @@ using AuthApi.Application.Abstractions;
 using AuthApi.Application.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace AuthApi.Bfi.Controllers;
 
@@ -53,6 +54,20 @@ public class AuthController : ControllerBase
 
     return result.Success
     ? Ok(new { message = result.Value })
+    : BadRequest(new { message = result.Message });
+  }
+  [HttpPost("change-password")]
+  [Authorize]
+  public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+  {
+    var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    if (!Guid.TryParse(userIdClaim, out var userId))
+      return Unauthorized();
+
+    var result = await _authService.ChangePasswordAsync(userId, request);
+
+    return result.Success
+    ? NoContent()
     : BadRequest(new { message = result.Message });
   }
 }
