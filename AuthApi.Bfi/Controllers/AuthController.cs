@@ -27,7 +27,7 @@ public class AuthController : ControllerBase
 
     return result.Success
       ? Ok(new { id = result.Value })
-      : BadRequest(new { message = result.Message });
+      : BadRequest(new { errors = result.Errors });
   }
   [HttpPost("login")]
   public async Task<IActionResult> Login([FromBody] LoginRequest request)
@@ -36,7 +36,7 @@ public class AuthController : ControllerBase
 
     return result.Success
     ? Ok(result.Value)
-    : Unauthorized(new { message = result.Message });
+    : Unauthorized(new { errors = result.Errors });
   }
   [HttpPost("refresh")]
   public async Task<IActionResult> RefreshToken([FromBody] RefreshRequest request)
@@ -44,7 +44,7 @@ public class AuthController : ControllerBase
     var result = await _refreshTokenService.RefreshTokenAsync(request.RefreshToken);
     return result.Success
     ? Ok(new { result.Value!.AccessToken, result.Value.RefreshToken}) 
-    : Unauthorized(new { message = result.Message });
+    : Unauthorized(new { errors = result.Errors });
   }
   [HttpPost("logout")]
   [Authorize]
@@ -54,7 +54,7 @@ public class AuthController : ControllerBase
 
     return result.Success
     ? Ok(new { message = result.Value })
-    : BadRequest(new { message = result.Message });
+    : BadRequest(new { errors = result.Errors });
   }
   [HttpPost("change-password")]
   [Authorize]
@@ -68,6 +68,6 @@ public class AuthController : ControllerBase
 
     return result.Success
     ? NoContent()
-    : BadRequest(new { message = result.Message });
+    : BadRequest(new { errors = result.Errors });
   }
 }

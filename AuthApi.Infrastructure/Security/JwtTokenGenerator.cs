@@ -2,11 +2,11 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using AuthApi.Application.Abstractions;
-using AuthApi.Application.Dtos;
 using AuthApi.Domain.Entities;
 using AuthApi.Application.Settings;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using AuthApi.Domain.Shared;
 
 namespace AuthApi.Infrastructure.Jwt;
 

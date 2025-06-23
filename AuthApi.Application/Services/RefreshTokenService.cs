@@ -1,8 +1,8 @@
 using System.Security.Cryptography;
 using AuthApi.Application.Abstractions;
-using AuthApi.Application.Dtos;
 using AuthApi.Domain.Abstractions;
 using AuthApi.Domain.Entities;
+using AuthApi.Domain.Shared;
 
 namespace AuthApi.Application.Services;
 

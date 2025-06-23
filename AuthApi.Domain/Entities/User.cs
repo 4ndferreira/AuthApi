@@ -1,20 +1,72 @@
+using AuthApi.Domain.Shared;
+
 namespace AuthApi.Domain.Entities;
 
-public class User
+public sealed class User
 {
-  public Guid Id { get; set; }
-  public string? Name { get; set;}
-  public string? Username { get; set; }
-  public string? Email { get; set; }
-  public string? PasswordHash { get; set; }
-  public string Role { get; set; }
-  public DateTime CreateAt { get; set; }
+  public Guid Id { get; private set; }
+  public string? Name { get; private set;}
+  public string? Username { get; private set; }
+  public string Email { get; private set; }
+  public string PasswordHash { get; private set; }
+  public string Role { get; private set; } = "User";
+  public DateTime CreateAt { get; private set; } = DateTime.UtcNow;
 
-  public User(string email, string passwordHash)
+  private User(string email, string passwordHash, string? name = null, string? username = null)
   {
+    Name = name;
+    Username = username;
     Email = email;
     PasswordHash = passwordHash;
-    Role = "User";
-    CreateAt = DateTime.UtcNow;
+  }
+
+  public static Result<User> CreateForRegistration(string email, string passwordHash)
+  {
+    var user = new User(email, passwordHash);
+
+    var errors = user.Validate(true);
+    
+    return errors.Count != 0
+      ? Result<User>.Failure(errors)
+      : Result<User>.SuccessResult(user);
+  }
+
+  public static Result<User> UpdateProfile(string username, string name, string role)
+  {
+    var user = new User(username, name, role);
+
+    var errors = user.Validate(false);
+
+    return errors.Count != 0
+      ? Result<User>.Failure(errors)
+      : Result<User>.SuccessResult(user);
+  }
+
+  public Result UpdatePassword(string newPasswordHashed)
+  {
+    if (string.IsNullOrWhiteSpace(newPasswordHashed))
+      return Result.Failure("A senha não pode ser vazia.");
+
+    PasswordHash = newPasswordHashed;
+    return Result.SuccessResult();
+  }
+
+  private List<string> Validate(bool isRegistration)
+  {
+    var errors = new List<string>();
+    if (string.IsNullOrWhiteSpace(Email))
+      errors.Add("O campo Email é obrigatório");
+    if (string.IsNullOrWhiteSpace(PasswordHash))
+      throw new InvalidOperationException("O campo Senha é obrigatório.");
+
+    if (!isRegistration)
+    {
+      if (string.IsNullOrWhiteSpace(Username))
+        errors.Add("O campo Username não pode ser vazio");
+      if (string.IsNullOrWhiteSpace(Name))
+        errors.Add("O campo Name não pode ser vazio");
+    }
+
+    return errors;
   }
 }

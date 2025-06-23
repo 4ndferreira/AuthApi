@@ -1,4 +1,4 @@
-namespace AuthApi.Application.Dtos;
+namespace AuthApi.Domain.Shared;
 
 public class TokenResult
 {

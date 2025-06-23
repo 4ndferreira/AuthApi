@@ -1,5 +1,5 @@
-using AuthApi.Application.Dtos;
 using AuthApi.Domain.Entities;
+using AuthApi.Domain.Shared;
 
 namespace AuthApi.Application.Abstractions;
 

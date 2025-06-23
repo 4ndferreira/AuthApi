@@ -2,6 +2,7 @@ using AuthApi.Application.Abstractions;
 using AuthApi.Application.Dtos;
 using AuthApi.Domain.Abstractions;
 using AuthApi.Domain.Entities;
+using AuthApi.Domain.Shared;
 
 namespace AuthApi.Application.Services;
 
@@ -30,7 +31,8 @@ public class AuthService : IAuthService
     if (request.CurrentPassword == request.NewPassword)
       return Result<string>.Failure("A nova senha não pode ser igual à atual.");
 
-    user.PasswordHash = _passwordHasher.Hash(request.NewPassword);
+    user.UpdatePassword(_passwordHasher.Hash(request.NewPassword));
+
     await _authRepository.SaveChangesAsync(user);
 
     return Result<string>.SuccessResult("Senha alterada com sucesso.");
@@ -57,10 +59,10 @@ public class AuthService : IAuthService
 
     var hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
-    var user = new User(request.Email, hashedPassword);
+    var user = User.CreateForRegistration(request.Email, hashedPassword);
 
-    await _authRepository.CreateUserAsync(user);
+    await _authRepository.CreateUserAsync(user.Value!);
     
-    return Result<Guid>.SuccessResult(user.Id);
+    return Result<Guid>.SuccessResult(user.Value!.Id);
   }
 }
