@@ -2,15 +2,13 @@ using AuthApi.Domain.Shared;
 
 namespace AuthApi.Domain.Entities;
 
-public sealed class User
+public sealed class User : Entity
 {
-  public Guid Id { get; private set; }
   public string? Name { get; private set;}
   public string? Username { get; private set; }
   public string Email { get; private set; }
   public string PasswordHash { get; private set; }
   public string Role { get; private set; } = "User";
-  public DateTime CreateAt { get; private set; } = DateTime.UtcNow;
 
   private User(string email, string passwordHash, string? name = null, string? username = null)
   {
@@ -57,7 +55,7 @@ public sealed class User
     if (string.IsNullOrWhiteSpace(Email))
       errors.Add("O campo Email é obrigatório");
     if (string.IsNullOrWhiteSpace(PasswordHash))
-      throw new InvalidOperationException("O campo Senha é obrigatório.");
+      errors.Add("O campo Senha é obrigatório.");
 
     if (!isRegistration)
     {

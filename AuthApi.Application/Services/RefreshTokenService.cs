@@ -20,18 +20,12 @@ public class RefreshTokenService : IRefreshTokenService
   {
     var tokens = _jwtTokenGenerator.GenerateToken(user);
     var refreshToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
-    var expiresAt = DateTime.UtcNow.AddDays(7);
-
-    var entity= new RefreshToken
-    {
-      Token = refreshToken,
-      ExpiresAt = expiresAt,
-      UserId = user.Id,
-    };
+    
+    var entity = RefreshToken.Create(refreshToken, user.Id);
 
     tokens.RefreshToken = refreshToken;
 
-    await _refreshTokenRepository.GenerateRefreshTokenAsync(entity);
+    await _refreshTokenRepository.GenerateRefreshTokenAsync(entity.Value!);
 
     return Result<TokenResult>.SuccessResult(tokens);
   }
@@ -55,8 +49,6 @@ public class RefreshTokenService : IRefreshTokenService
     var tokenFromDb = await _refreshTokenRepository.GetRefreshTokenAsync(refreshToken);
     if (tokenFromDb == null || tokenFromDb.IsRevoked)
       return Result<string>.Failure("Refresh Token inválido ou já revogado.");
-
-    tokenFromDb.RevokedAt = DateTime.UtcNow;
 
     await _refreshTokenRepository.RevokeRefreshTokenAsync(refreshToken);
 

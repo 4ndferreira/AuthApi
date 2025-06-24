@@ -4,7 +4,7 @@ public record Result<T>
 {
   public bool Success { get; init; }
   public T? Value { get; init; }
-  public List<string> Errors { get; init; } = [];
+  public List<string>? Errors { get; init; }
   public static Result<T> SuccessResult(T value) => new()
   {
     Success = true,
@@ -24,7 +24,7 @@ public record Result<T>
 public record Result
 {
   public bool Success { get; init; }
-  public List<string> Errors { get; init; } = [];
+  public List<string>? Errors { get; init; }
   public static Result SuccessResult() => new()
   {
   };
