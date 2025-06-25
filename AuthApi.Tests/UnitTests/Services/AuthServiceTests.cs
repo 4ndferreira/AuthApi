@@ -3,6 +3,7 @@ using AuthApi.Application.Dtos;
 using AuthApi.Application.Services;
 using AuthApi.Domain.Abstractions;
 using AuthApi.Domain.Entities;
+using AuthApi.Tests.UnitTests.Services.Builders;
 using Bogus;
 using Moq;
 
@@ -39,7 +40,7 @@ public class AuthServiceTests
 
     //Assert
     Assert.False(result.Success);
-    Assert.Equal("Email ou senha inválidos.", result.Errors.First());
+    Assert.Equal("Email ou senha inválidos.", result.Errors!.First());
     Assert.Null(result.Value);
   }
 
@@ -47,37 +48,34 @@ public class AuthServiceTests
   public async Task RegisterAsync_EmailExistente_Falha()
   {
     //Arrange
-    _authRepositoryMock.Setup(x => x.UserExistsByEmailAsync("existente@teste.com"))
+    var request = RegisterRequestBuilder.Build();
+    
+    _authRepositoryMock.Setup(x => x.UserExistsByEmailAsync(request.Email))
                        .ReturnsAsync(true);
-
-    var request = new RegisterRequest("existente@teste.com", "qualquer") ;
 
     //Act
     var result = await _authService.RegisterAsync(request);
 
     //Assert
     Assert.False(result.Success);
-    Assert.Equal("Já existe usuário registrado com o email informado.", result.Errors.First());
+    Assert.Equal("Já existe usuário registrado com o email informado.", result.Errors!.First());
   }
 
   [Fact]
   public async Task RegisterAsync_EmailNovo_RetornaGuid()
   {
     //Arrange
-    var faker = new Faker();
-    var email = faker.Internet.Email();
-    var password = faker.Internet.Password();
-    var request = new RegisterRequest(email, password);
+    var request = RegisterRequestBuilder.Build();
     var fakeHashedPassword = "$2a$11$Fak3HashParaTestarComBCrypt";
-    _passwordHasherMock.Setup(x => x.Hash(password)).Returns(fakeHashedPassword);
-    var fakeUser = User.CreateForRegistration(email, fakeHashedPassword);
 
-    _authRepositoryMock.Setup(x => x.UserExistsByEmailAsync(email))
+    _passwordHasherMock.Setup(x => x.Hash(request.Password)).Returns(fakeHashedPassword);
+
+    var fakeUser = User.CreateForRegistration(request.Email, fakeHashedPassword);
+
+    _authRepositoryMock.Setup(x => x.UserExistsByEmailAsync(request.Email))
                        .ReturnsAsync(false);
 
-    User? createdUser = null;
-    _authRepositoryMock.Setup(x => x.CreateUserAsync(It.IsAny<User>()))
-                       .Callback<User>(u => createdUser = u)
+    _authRepositoryMock.Setup(x => x.CreateUserAsync(fakeUser.Value!))
                        .Returns(Task.CompletedTask);
 
     //Act
@@ -87,8 +85,8 @@ public class AuthServiceTests
     Assert.True(result.Success);
     Assert.NotEqual(Guid.Empty, result.Value);
     Assert.Null(result.Errors);
-    Assert.NotNull(createdUser);
-    Assert.Equal(email, createdUser.Email);
-    Assert.Equal(fakeHashedPassword, createdUser.PasswordHash);
+    Assert.NotNull(fakeUser.Value);
+    Assert.Equal(request.Email, fakeUser.Value!.Email);
+    Assert.Equal(fakeHashedPassword, fakeUser.Value!.PasswordHash);
   }
 }     

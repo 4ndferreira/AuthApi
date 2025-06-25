@@ -15,7 +15,7 @@ public static class DependencyInjection
 {
   public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration config)
   {
-    services.AddDbContext<AppDbContext>(options => options.UseSqlite("Data Source=auth.db"));
+    services.AddDbContext<AppDbContext>(options => options.UseSqlite("Data Source=../AuthApi.Infrastructure/auth.db"));
 
     services.AddScoped<IAuthRepository, AuthRepository>();
     services.AddScoped<IAuthService, AuthService>();

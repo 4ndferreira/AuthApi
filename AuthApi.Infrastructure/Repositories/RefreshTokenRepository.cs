@@ -28,7 +28,7 @@ public class RefreshTokenRepository : IRefreshTokenRepository
     var token = await _context.RefreshTokens.FirstOrDefaultAsync(t => t.Token == refreshToken);
     if (token != null && !token.IsRevoked)
     {
-      token.RevokedAt = DateTime.UtcNow;
+      token.RevokeToken();
       await _context.SaveChangesAsync(); 
     }
   }
